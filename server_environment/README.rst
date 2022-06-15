@@ -7,20 +7,23 @@ server configuration environment files
    !! changes will be overwritten.                   !!
    !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-.. |badge1| image:: https://img.shields.io/badge/maturity-Beta-yellow.png
+.. |badge1| image:: https://img.shields.io/badge/maturity-Production%2FStable-green.png
     :target: https://odoo-community.org/page/development-status
-    :alt: Beta
-.. |badge2| image:: https://img.shields.io/badge/github-OCA%2Fserver--env-lightgray.png?logo=github
+    :alt: Production/Stable
+.. |badge2| image:: https://img.shields.io/badge/licence-LGPL--3-blue.png
+    :target: http://www.gnu.org/licenses/lgpl-3.0-standalone.html
+    :alt: License: LGPL-3
+.. |badge3| image:: https://img.shields.io/badge/github-OCA%2Fserver--env-lightgray.png?logo=github
     :target: https://github.com/OCA/server-env/tree/13.0/server_environment
     :alt: OCA/server-env
-.. |badge3| image:: https://img.shields.io/badge/weblate-Translate%20me-F47D42.png
+.. |badge4| image:: https://img.shields.io/badge/weblate-Translate%20me-F47D42.png
     :target: https://translation.odoo-community.org/projects/server-env-13-0/server-env-13-0-server_environment
     :alt: Translate me on Weblate
-.. |badge4| image:: https://img.shields.io/badge/runbot-Try%20me-875A7B.png
+.. |badge5| image:: https://img.shields.io/badge/runbot-Try%20me-875A7B.png
     :target: https://runbot.odoo-community.org/runbot/254/13.0
     :alt: Try me on Runbot
 
-|badge1| |badge2| |badge3| |badge4| 
+|badge1| |badge2| |badge3| |badge4| |badge5| 
 
 This module provides a way to define an environment in the main Odoo
 configuration file and to read some configurations from files
@@ -68,6 +71,8 @@ used values are 'dev', 'test', 'production'::
 Values associated to keys containing 'passw' are only displayed in the 'dev'
 environment.
 
+If you don't provide any value, `test` is used as a safe default.
+
 You have several possibilities to set configuration values:
 
 server_environment_files
@@ -111,7 +116,7 @@ A public file, containing that will contain public variables::
 
     # server environment options
     export SERVER_ENV_CONFIG="
-    [storage_backend.my-sftp]
+    [storage_backend.my_sftp]
     sftp_server=10.10.10.10
     sftp_login=foo
     sftp_port=22200
@@ -125,9 +130,17 @@ A second file which is encrypted and contains secrets::
     export DB_PASSWORD='xxxxxxxxx'
     # server environment options
     export SERVER_ENV_CONFIG_SECRET="
-    [storage_backend.my-sftp]
+    [storage_backend.my_sftp]
     sftp_password=xxxxxxxxx
     "
+
+**WARNING**
+
+  `my_sftp` must match the name of the record.
+  If you want something more reliable use `server.env.techname.mixin`
+  and use `tech_name` field to reference records.
+  See "USAGE".
+
 
 Default values
 ~~~~~~~~~~~~~~
@@ -167,12 +180,23 @@ by an override of ``_server_env_fields``.
 Read the documentation of the class and methods in `models/server_env_mixin.py
 <models/server_env_mixin.py>`__.
 
+
+If you want to have a technical name to reference::
+
+    class StorageBackend(models.Model):
+        _name = "storage.backend"
+        _inherit = ["storage.backend", "server.env.techname.mixin", "server.env.mixin"]
+
+        [...]
+
 Known issues / Roadmap
 ======================
 
 * it is not possible to set the environment from the command line. A
   configuration file must be used.
 * the module does not allow to set low level attributes such as database server, etc.
+* `server.env.techname.mixin`'s `tech_name` field could leverage the new option
+  for computable / writable fields and get rid of some onchange / read / write code.
 
 Bug Tracker
 ===========
@@ -206,6 +230,7 @@ Contributors
 * Guewen Baconnier <guewen.baconnier@camptocamp.com>
 * Thomas Binfeld <thomas.binsfeld@acsone.eu>
 * Stéphane Bidoul <stefane.bidoul@acsone.com>
+* Simone Orsi <simahawk@gmail.com>
 
 Maintainers
 ~~~~~~~~~~~
